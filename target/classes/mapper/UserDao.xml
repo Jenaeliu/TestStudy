@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--约束文件，限制、检查在当前文件中出现的标签，属性必须符合mybatis要求 -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--当前文件根标签，必须的
+   namespace:命名空间，唯一值，可以是自定义的字符串，要求使用dao接口的全限定名称
+ -->
+<mapper namespace="com.example.dao.UserDao">
+<!--在当前文件中，可以使用特定的标签，表示数据库的特定操作 -->
+    <!--查询-->
+    <!-- id要求使用接口中的方法名
+        resultType表示sql执行后得到的ResultSet,遍历这个结果集得到Java对象的类型，要求是类型的全限定名称 -->
+<select id="queryUserAll"  resultType="com.example.entity.User">
+    select * from user ;
+</select>
+    <select id="findById"   resultType="com.example.entity.User">
+        select * from user where id=#{id};
+    </select>
+    <insert id="addUser" parameterType="com.example.entity.User">
+         INSERT INTO user (
+        user_name,
+        psd,
+        name ,
+        age,
+        sex,
+        birthday,
+        created,
+        updated
+        )
+        VALUES
+        (
+        #{user_name},
+        #{psd},
+        #{name},
+        #{age},
+        #{sex},
+        #{birthday},
+        now(),
+        now()
+        );
+    </insert>
+    <delete id="deleteUser">
+        delete from user where id=#{id};
+    </delete>
+
+    <update id="updateUser" parameterType="com.example.entity.User">
+        update user
+       <trim prefix="set" suffixOverrides=",">
+            <if test="user_name!=null">user_name = #{user_name},</if>
+            <if test="psd!=null">psd = #{psd},</if>
+            <if test="name!=null">name = #{name},</if>
+            <if test="age!=null">age = #{age},</if>
+            <if test="sex!=null">sex = #{sex},</if>
+            <if test="birthday!=null">birthday = #{birthday},</if>
+            updated = now(),
+        </trim>
+       where id = #{id};
+    </update>
+
+    <!--分页查询1 -->
+    <select id="selectByPage" resultType="com.example.entity.User">
+        select * from user limit #{param1},#{param2};
+    </select>
+
+    <!-- 查询总条数-->
+    <select id="selectCount" resultType="java.lang.Integer">
+        select count(*) from user
+    </select>
+
+    <select id="selectByUserSelective" resultMap="BaseResultMap" parameterType="com.example.entity.User">
+        select
+        <include refid="Base_Column_List" />
+        from user
+        where 1=1
+        <if test="name != null and name !=''">
+            and name like concat('%', #{name}, '%')
+        </if>
+        <if test="sex != null">
+            and sex=#{sex}
+        </if>
+    </select>
+
+    <sql id="Base_Column_List" >
+       id,user_name,psd,name ,age, sex,birthday,created,updated
+    </sql>
+
+    <resultMap id="BaseResultMap" type="com.example.entity.User">
+        <id property="id" column="id" />
+        <result column="NAME" property="name" />
+        <result column="USER_NAME" property="user_name" />
+        <result column="PSD" property="psd" />
+        <result column="BIRTHDAY" property="birthday" />
+        <result column="AGE" property="age" />
+        <result column="SEX" property="sex" />
+        <result column="CREATED" property="created" />
+        <result column="UPDATED" property="updated" />
+        
+        <association property="dep"  javaType="Dep">
+            <id column="d_id"  property="d_id"/>
+            <result column="d_name"  property="d_name"/>
+
+        </association>
+    </resultMap>
+
+    <select id="queryUserDepMapper" resultMap="BaseResultMap">
+        select u.* ,d.* from user u,dep d where u.d_id=d.d_id;
+    </select>
+
+    <!--  使用内连接+级联属性：-->
+    <resultMap id="UserMap" type="com.example.entity.User">
+        <id property="id" column="id" />
+        <result column="NAME" property="name" />
+        <result column="USER_NAME" property="user_name" />
+        <result column="PSD" property="psd" />
+        <result column="BIRTHDAY" property="birthday" />
+        <result column="AGE" property="age" />
+        <result column="SEX" property="sex" />
+        <result column="CREATED" property="created" />
+        <result column="UPDATED" property="updated" />
+        <result column="d_id" property="dep.d_id" />
+        <result column="d_name" property="dep.d_name" />
+
+</resultMap>
+    <select id="queryUserDepMapper2" resultMap="UserMap">
+        select u.*,d.* from user u,dep d where u.d_id=d.d_id AND u.id = #{id};
+    </select>
+
+<!--使用内连接+association引用resultMap  -->
+    <resultMap id="BaseResultMap" type="com.example.entity.User">
+        <id property="id" column="id" />
+        <result column="NAME" property="name" />
+        <result column="USER_NAME" property="user_name" />
+        <result column="PSD" property="psd" />
+        <result column="BIRTHDAY" property="birthday" />
+        <result column="AGE" property="age" />
+        <result column="SEX" property="sex" />
+        <result column="CREATED" property="created" />
+        <result column="UPDATED" property="updated" />
+
+        <association property="dep"  column="d_id"
+                     resultMap="com.example.dao.DepDao.DepMap">
+        </association>
+    </resultMap>
+        <resultMap type="com.example.entity.Dep" id="DepMap">
+            <id property="d_id" column="d_id" />
+            <result property="d_name" column="d_name" />
+        </resultMap>
+        <select id="selectById" parameterType="Integer"
+                resultMap="DepMap">
+        select d_id ,d_name from dep;
+    </select>
+
+
+    <select id="queryUserDepMapper" resultMap="BaseResultMap">
+        select u.* ,d.* from user u,dep d where u.d_id=d.d_id;
+    </select>
+
+</mapper>

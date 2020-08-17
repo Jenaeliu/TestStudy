@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--约束文件，限制、检查在当前文件中出现的标签，属性必须符合mybatis要求 -->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--当前文件根标签，必须的
+   namespace:命名空间，唯一值，可以是自定义的字符串，要求使用dao接口的全限定名称
+ -->
+<mapper namespace="com.example.dao.DepDao">
+    <!--在当前文件中，可以使用特定的标签，表示数据库的特定操作 -->
+    <!--查询-->
+    <!-- id要求使用接口中的方法名
+        resultType表示sql执行后得到的ResultSet,遍历这个结果集得到Java对象的类型，要求是类型的全限定名称 -->
+    <select id="queryUserAll"  resultType="com.example.entity.Dep">
+
+    </select>
+</mapper>
